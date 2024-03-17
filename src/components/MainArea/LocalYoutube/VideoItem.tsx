@@ -1,23 +1,38 @@
-import "./VideoItem.css"
-
+import "./VideoItem.css";
+import { VideoData } from "../../../utils/interfaces";
+import { FastAverageColor } from "fast-average-color";
+import { useEffect, useState } from "react";
 
 interface Props {
-  thumbnail_url: string,
-  duration: string,
-  title: string,
-  channel_name: string,
-  channel_is_verified: boolean,
-  view_count: number,
-  url: string,
-  onClick: (url: string) => void;
+	videoData: VideoData;
+	onClick: (url: string) => void;
 }
 
+export default function VideoItem({ videoData, onClick }: Props) {
+  const [backgroundColor, setBackgroundColor] = useState('#ffffff'); // default color
 
-export default function VideoItem({thumbnail_url, duration, title, channel_name, channel_is_verified, view_count, url, onClick}: Props) {
+  const fastAverageColor = new FastAverageColor();
+
+  useEffect(() => {
+    async function fetchData() {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const imageData: Buffer = await (window as any).electronAPI.fetchImage(videoData.thumbnail_url);
+      const blob = new Blob([imageData], { type: "image/jpeg" });
+      const url = URL.createObjectURL(blob);
+      const color = fastAverageColor.getColorAsync(url);
+      setBackgroundColor((await color).hex);
+    }
+
+    fetchData();
+    
+  });
+
   return (
-    <div className="video-item" onClick={() => onClick(url)}>
-      <img className="video-item-thumbnail" src={thumbnail_url} />
-      <p className="video-item-duration">{duration}</p>
+    <div className="video-item" onClick={() => onClick(videoData.url)}>
+      <div style={{ backgroundColor }} className="video-thumbnail-container">
+        <img className="video-thumbnail" src={videoData.thumbnail_url} />
+        {videoData.duration && <p className="video-duration">{videoData.duration}</p>}
+      </div>
     </div>
-  )
+  );
 }

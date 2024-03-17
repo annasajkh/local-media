@@ -1,11 +1,13 @@
 import { contextBridge, ipcRenderer } from "electron";
+import { VideoData } from "../src/utils/interfaces";
 
 
 // --------- Expose some API to the Renderer process ---------
 contextBridge.exposeInMainWorld("ipcRenderer", withPrototype(ipcRenderer));
 
 contextBridge.exposeInMainWorld("electronAPI", {
-	searchYoutubeVideo: async (query: string, count: number): Promise<string | null> => await ipcRenderer.invoke("searchYoutubeVideo", query, count)
+	searchYoutubeVideo: async (query: string, count: number): Promise<VideoData[] | null> => await ipcRenderer.invoke("searchYoutubeVideo", query, count),
+	fetchImage: async (imageUrl: string): Promise<Buffer | null> => await ipcRenderer.invoke("fetchImage", imageUrl)
 });
 
 

@@ -2,9 +2,10 @@ import { app, BrowserWindow } from "electron";
 import path from "node:path";
 
 import contextMenu from "electron-context-menu";
-import { IpcMainInvokeEvent, ipcMain } from "electron"
-import os from "os"
+import { IpcMainInvokeEvent, ipcMain, net} from "electron";
+import os from "os";
 import { spawn } from "child_process";
+import { VideoData } from "../src/utils/interfaces";
 
 // The built directory structure
 //
@@ -51,49 +52,72 @@ function createWindow() {
 	}
 }
 
-ipcMain.handle("searchYoutubeVideo", async (_event: IpcMainInvokeEvent, query: string, count: number): Promise<string | null> => {
-    return new Promise((resolve, reject) => {
-        if (os.platform() == "win32") {
+ipcMain.handle("searchYoutubeVideo", async (_event: IpcMainInvokeEvent, query: string, count: number): Promise<VideoData[] | null> => {
+	return new Promise((resolve, reject) => {
+		if (os.platform() == "win32") {
+			const ytDlp = spawn(".\\externals\\yt-dlp\\yt-dlp-windows.exe", [`ytsearch${count}:${query}`, "--dump-json", "--flat-playlist"]);
+			let output: string = "";
 
-            const ytDlp = spawn(".\\externals\\yt-dlp\\yt-dlp-windows.exe", [`ytsearch${count}:${query}`, "--dump-json", "--flat-playlist"]);
-            let output: string = "";
+			ytDlp.stdout.on("data", (data: string) => {
+				output += data;
+			});
 
-            ytDlp.stdout.on("data", (data: string) => {
-                output += data;
-            });
+			ytDlp.stderr.on("data", (data: string) => {
+				console.error(`stderr: ${data}`);
+			});
 
-            ytDlp.stderr.on("data", (data: string) => {
-                console.error(`stderr: ${data}`);
-            });
+			ytDlp.on("close", async (code) => {
+				if (code !== 0) {
+					console.error(`yt-dlp process exited with code ${code}`);
+					reject(new Error(`yt-dlp process exited with code ${code}`));
+				} else {
+					try {
+						const videoListString: string[] = output.split("\n").filter((line) => line.trim() !== "");
+						const videoListJson: VideoData[] = [];
 
-            ytDlp.on("close", (code) => {
-                if (code !== 0) {
-                    console.error(`yt-dlp process exited with code ${code}`);
-                    reject(new Error(`yt-dlp process exited with code ${code}`));
-                } else {
-                    try {
-                        const videos: string[] = output.split('\n').filter(line => line.trim() !== '');
+						for (let i = 0; i < videoListString.length; i++) {
+							const videoJson = JSON.parse(videoListString[i]);
+							const videoThumbnailURL: string = videoJson.thumbnails[videoJson.thumbnails.length - 1].url;
 
-                        let videosString: string = "[";
+							videoListJson.push({
+								thumbnail_url: videoThumbnailURL,
+								duration: videoJson.duration_string,
+								title: videoJson.title,
+								channel_name: videoJson.channel,
+								channel_is_verified: videoJson.channel_is_verified,
+								view_count: videoJson.view_count,
+								url: videoJson.url,
+								background_color: "#FFFFFF",
+							});
+						}
 
-                        for (let i = 0; i < videos.length - 1; i++) {
-                            videosString += `${videos[i]},`;
-                        }
+						resolve(videoListJson);
+					} catch (error) {
+						console.error(`Failed to parse JSON: ${error}`);
+						reject(error);
+					}
+				}
+			});
+		} else {
+			resolve(null);
+		}
+	});
+});
 
-                        videosString += videos[videos.length - 1];
-                        videosString += "]";
-
-                        resolve(videosString);
-                    } catch (err) {
-                        console.error('Failed to parse JSON:', err);
-                        reject(err);
-                    }
-                }
-            });
-        } else {
-            resolve(null);
-        }
-    });
+ipcMain.handle("fetchImage", async (_event: IpcMainInvokeEvent, imageUrl: string): Promise<Buffer | null>  => {
+	return new Promise((resolve, reject) => {
+		const request = net.request(imageUrl);
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const imageData: any = [];
+		request.on("response", (response) => {
+			response.on("data", (chunk) => {
+				imageData.push(chunk);
+			});
+			response.on("end", () => resolve(Buffer.concat(imageData)));
+			response.on("error", reject);
+		});
+		request.end();
+	});
 });
 
 // Quit when all windows are closed, except on macOS. There, it's common

@@ -1,20 +1,31 @@
 .video-item {
-	position: relative;
-	text-align: center;
+
 }
 
-.video-item-thumbnail {
+.video-item:hover {
+    cursor: pointer;
+}
+
+.video-thumbnail-container {
+	position: relative;
+    display: flex;
+    align-items: center;
+    border-radius: 5px;
+}
+
+.video-thumbnail {
     width: 480px;
     height: 270px;
-	border-radius: 5px;
+    object-fit: contain;
+    border-radius: 5px;
 }
 
-.video-item-duration {
+.video-duration {
     background-color: black;
     color: white;
     border-radius: 8px;
     padding: 8px;
 	position: absolute;
-	bottom: 8px;
-	right: 16px;
+	bottom: 4px;
+	right: 8px;
 }
