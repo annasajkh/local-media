@@ -1,0 +1,31 @@
+
+.search-bar-container {
+    display: flex;
+    background-color: #181b1e;
+	height: 48px;
+    margin-top: 16px;
+	padding-left: 8px;
+	padding-right: 8px;
+	border-radius: 3px;
+	border-width: 1px;
+    width: 50%;
+    min-width: 200px;
+}
+
+.search-bar {
+    width: 100%;
+}
+
+.search-logo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.search-logo {
+	width: 32px;
+	height: 32px;
+	border-radius: 3px;
+	user-select: none;
+    padding-right: 8px;
+}
