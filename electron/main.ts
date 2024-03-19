@@ -5,7 +5,7 @@ import contextMenu from "electron-context-menu";
 import { IpcMainInvokeEvent, ipcMain, net} from "electron";
 import os from "os";
 import { spawn } from "child_process";
-import { VideoData } from "../src/utils/interfaces";
+import { VideoData } from "../src/utils/InterfaceTypes";
 
 // The built directory structure
 //
@@ -54,53 +54,77 @@ function createWindow() {
 
 ipcMain.handle("searchYoutubeVideo", async (_event: IpcMainInvokeEvent, query: string, count: number): Promise<VideoData[] | null> => {
 	return new Promise((resolve, reject) => {
-		if (os.platform() == "win32") {
-			const ytDlp = spawn(".\\externals\\yt-dlp\\yt-dlp-windows.exe", [`ytsearch${count}:${query}`, "--dump-json", "--flat-playlist"]);
-			let output: string = "";
+		let executablePath: string = "";
 
-			ytDlp.stdout.on("data", (data: string) => {
-				output += data;
-			});
-
-			ytDlp.stderr.on("data", (data: string) => {
-				console.error(`stderr: ${data}`);
-			});
-
-			ytDlp.on("close", async (code) => {
-				if (code !== 0) {
-					console.error(`yt-dlp process exited with code ${code}`);
-					reject(new Error(`yt-dlp process exited with code ${code}`));
-				} else {
-					try {
-						const videoListString: string[] = output.split("\n").filter((line) => line.trim() !== "");
-						const videoListJson: VideoData[] = [];
-
-						for (let i = 0; i < videoListString.length; i++) {
-							const videoJson = JSON.parse(videoListString[i]);
-							const videoThumbnailURL: string = videoJson.thumbnails[videoJson.thumbnails.length - 1].url;
-
-							videoListJson.push({
-								thumbnail_url: videoThumbnailURL,
-								duration: videoJson.duration_string,
-								title: videoJson.title,
-								channel_name: videoJson.channel,
-								channel_is_verified: videoJson.channel_is_verified,
-								view_count: videoJson.view_count,
-								url: videoJson.url,
-								background_color: "#FFFFFF",
-							});
-						}
-
-						resolve(videoListJson);
-					} catch (error) {
-						console.error(`Failed to parse JSON: ${error}`);
-						reject(error);
-					}
-				}
-			});
-		} else {
-			resolve(null);
+		switch (os.platform()) {
+			case "win32":
+				executablePath = ".\\externals\\yt-dlp\\yt-dlp-windows.exe";
+				break;
+		
+			case "linux":
+				executablePath = "./externals/yt-dlp/yt-dlp-linux";
+				break;
+			
+			case "darwin":
+				executablePath = "./externals/yt-dlp/yt-dlp-macos";
+				break;
 		}
+
+		const ytDlp = spawn(executablePath, [`ytsearch${count}:${query}`, "--dump-json", "--flat-playlist"]);
+		let output: string = "";
+
+		ytDlp.stdout.on("data", (data: string) => {
+			output += data;
+		});
+
+		ytDlp.stderr.on("data", (data: string) => {
+			console.error(`stderr: ${data}`);
+		});
+
+		ytDlp.on("close", async (code) => {
+			if (code !== 0) {
+				console.error(`yt-dlp process exited with code ${code}`);
+				reject(new Error(`yt-dlp process exited with code ${code}`));
+			} else {
+				try {
+					const videoListString: string[] = output.split("\n").filter((line) => line.trim() !== "");
+					const videoListJson: VideoData[] = [];
+
+					for (let i = 0; i < videoListString.length; i++) {
+						const videoJson = JSON.parse(videoListString[i]);
+						const videoThumbnailURL: string = videoJson.thumbnails[videoJson.thumbnails.length - 1].url;
+
+						videoListJson.push({
+							thumbnail_url: videoThumbnailURL,
+							duration: videoJson.duration_string,
+							title: videoJson.title,
+							channel_name: videoJson.channel,
+							channel_is_verified: videoJson.channel_is_verified,
+							view_count: videoJson.view_count,
+							url: videoJson.url,
+							background_color: "#FFFFFF",
+						});
+					}
+
+					const foundURL: string[] = [];
+					const duplicateFiltered: VideoData[] = []
+
+					for (let i = 0; i < videoListJson.length; i++) {
+						if (!foundURL.includes(videoListJson[i].url)) {
+							foundURL.push(videoListJson[i].url)
+							duplicateFiltered.push(videoListJson[i])
+						}
+					}
+					
+
+					resolve(duplicateFiltered);
+
+				} catch (error) {
+					console.error(error);
+					reject(error);
+				}
+			}
+		});
 	});
 });
 

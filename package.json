@@ -1,10 +1,16 @@
 {
 	"name": "local-media",
+	"author": {
+		"name": "AnnasVirtual"
+	},
+	"description": "Play a media locally",
 	"private": true,
-	"version": "0.0.0",
+	"version": "0.0.1-alpha",
 	"scripts": {
 		"dev": "vite",
-		"build": "tsc && vite build && electron-builder",
+		"build:win": "tsc && vite build && electron-builder --win --config",
+		"build:mac": "tsc && vite build && electron-builder --mac --config",
+		"build:linux": "tsc && vite build && electron-builder --linux --config",
 		"lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
 		"preview": "vite preview"
 	},
@@ -24,7 +30,6 @@
 		"@typescript-eslint/parser": "^6.6.0",
 		"@vitejs/plugin-react": "^4.0.4",
 		"electron": "^29.0.0",
-		"electron-builder": "^24.6.4",
 		"eslint": "^8.48.0",
 		"eslint-plugin-react-hooks": "^4.6.0",
 		"eslint-plugin-react-refresh": "^0.4.3",

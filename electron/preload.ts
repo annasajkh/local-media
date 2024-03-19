@@ -1,18 +1,24 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { contextBridge, ipcRenderer } from "electron";
-import { VideoData } from "../src/utils/interfaces";
+import { VideoData } from "../src/utils/InterfaceTypes";
 
 
 // --------- Expose some API to the Renderer process ---------
 contextBridge.exposeInMainWorld("ipcRenderer", withPrototype(ipcRenderer));
 
-contextBridge.exposeInMainWorld("electronAPI", {
+contextBridge.exposeInMainWorld("electron", {
+	ipcRenderer: {
+		...ipcRenderer,
+		on: ipcRenderer.on.bind(ipcRenderer),
+		removeListener: ipcRenderer.removeListener.bind(ipcRenderer),
+	},
+
 	searchYoutubeVideo: async (query: string, count: number): Promise<VideoData[] | null> => await ipcRenderer.invoke("searchYoutubeVideo", query, count),
 	fetchImage: async (imageUrl: string): Promise<Buffer | null> => await ipcRenderer.invoke("fetchImage", imageUrl)
 });
 
 
-// `exposeInMainWorld` can't detect attributes and methods of `prototype`, manually patching it.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 function withPrototype(obj: Record<string, any>) {
 	const protos = Object.getPrototypeOf(obj);
 
@@ -20,8 +26,6 @@ function withPrototype(obj: Record<string, any>) {
 		if (Object.prototype.hasOwnProperty.call(obj, key)) continue;
 
 		if (typeof value === "function") {
-			// Some native APIs, like `NodeJS.EventEmitter['on']`, don't work in the Renderer process. Wrapping them into a function.
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			obj[key] = function (...args: any) {
 				return value.call(obj, ...args);
 			};

@@ -1,5 +1,5 @@
 import "./VideoItem.css";
-import { VideoData } from "../../../utils/interfaces";
+import { VideoData } from "../../../utils/InterfaceTypes";
 import { FastAverageColor } from "fast-average-color";
 import { useEffect, useState } from "react";
 
@@ -15,8 +15,7 @@ export default function VideoItem({ videoData, onClick }: Props) {
 
   useEffect(() => {
     async function fetchData() {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const imageData: Buffer = await (window as any).electronAPI.fetchImage(videoData.thumbnail_url);
+      const imageData: Buffer = await window.electron.fetchImage(videoData.thumbnail_url);
       const blob = new Blob([imageData], { type: "image/jpeg" });
       const url = URL.createObjectURL(blob);
       const color = fastAverageColor.getColorAsync(url);

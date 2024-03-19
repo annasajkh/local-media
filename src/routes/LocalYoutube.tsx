@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import TopBar from "../components/MainArea/TopBar/TopBar";
 import "./LocalYoutube.css";
 
@@ -7,7 +9,8 @@ import SearchBar from "../components/MainArea/TopBar/SearchBar";
 import loadingAnimation from "../assets/animations/loading.gif";
 import VideoItem from "../components/MainArea/LocalYoutube/VideoItem";
 import ReactPlayer from "react-player";
-import { VideoData } from "../utils/interfaces";
+import { VideoData } from "../utils/InterfaceTypes";
+
 
 export default function LocalYoutube() {
 	const [youtubeSearchResult, setYoutubeSearchResult] = useState<VideoData[] | null>(null);
@@ -16,8 +19,7 @@ export default function LocalYoutube() {
 	async function searchYoutubeVideo(query: string) {
 		setYoutubeSearchResult([]);
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const result: VideoData[] = await (window as any).electronAPI.searchYoutubeVideo(query, 9 * 5);
+		const result: VideoData[] = await window.electron.searchYoutubeVideo(query, 9 * 5);
 		setYoutubeSearchResult(result);
 	}
 

@@ -9,3 +9,4 @@ export interface VideoData {
 	url: string;
     background_color: string
 }
+
