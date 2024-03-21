@@ -1,31 +1,47 @@
 .video-item {
-
+    width: 320px;
+    background-color: var(--item-color);
+    border-radius: 10px;
+    padding: 8px;
 }
 
 .video-item:hover {
     cursor: pointer;
+    transform: scale(1.0075)
 }
 
 .video-thumbnail-container {
 	position: relative;
     display: flex;
     align-items: center;
-    border-radius: 5px;
+    border-radius: 10px;
 }
 
 .video-thumbnail {
-    width: 480px;
-    height: 270px;
+    width: 320px;
+    height: 180px;
     object-fit: contain;
-    border-radius: 5px;
+    border-radius: 10px;
 }
 
 .video-duration {
     background-color: black;
     color: white;
     border-radius: 8px;
-    padding: 8px;
+    padding: 4px;
 	position: absolute;
-	bottom: 4px;
-	right: 8px;
+	top: 128px;
+	right: 4px;
+}
+
+.video-info-container {
+    padding: 4px
+}
+
+.video-title {
+    line-height: 1.5rem;
+    height: 3rem;
+    overflow: hidden;
+    margin-top: 4px;
+    margin-bottom: 4px;
 }

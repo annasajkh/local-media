@@ -1,9 +1,8 @@
 
 .search-bar-container {
     display: flex;
-    background-color: #181b1e;
+    background-color: var(--item-color);
 	height: 48px;
-    margin-top: 16px;
 	padding-left: 8px;
 	padding-right: 8px;
 	border-radius: 3px;

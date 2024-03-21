@@ -32,6 +32,7 @@ function createWindow() {
 	win = new BrowserWindow({
 		width: 960,
 		height: 540,
+        minWidth: 674,
 		autoHideMenuBar: true,
 		icon: path.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
 		webPreferences: {
@@ -95,6 +96,7 @@ ipcMain.handle("searchYoutubeVideo", async (_event: IpcMainInvokeEvent, query: s
 						const videoThumbnailURL: string = videoJson.thumbnails[videoJson.thumbnails.length - 1].url;
 
 						videoListJson.push({
+                            is_short: videoJson.duration_string == null,
 							thumbnail_url: videoThumbnailURL,
 							duration: videoJson.duration_string,
 							title: videoJson.title,
@@ -102,7 +104,7 @@ ipcMain.handle("searchYoutubeVideo", async (_event: IpcMainInvokeEvent, query: s
 							channel_is_verified: videoJson.channel_is_verified,
 							view_count: videoJson.view_count,
 							url: videoJson.url,
-							background_color: "#FFFFFF",
+							background_color: null,
 						});
 					}
 

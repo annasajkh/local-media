@@ -1,12 +1,12 @@
 
 export interface VideoData {
+    is_short: boolean;
 	thumbnail_url: string;
-	duration: string | null;
 	title: string;
-	channel_name: string;
-	channel_is_verified: boolean;
-	view_count: number;
 	url: string;
-    background_color: string
+	duration: string | undefined;
+	channel_name: string | null;
+	channel_is_verified: boolean | null;
+	view_count: number;
+    background_color: string | null
 }
-

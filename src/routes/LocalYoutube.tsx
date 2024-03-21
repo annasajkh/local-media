@@ -27,27 +27,34 @@ export default function LocalYoutube() {
 		setVideoPlayerUrl(url);
 	}
 
+	function reactPlayerContainer() {
+		return (
+			<div className="react-player-container">
+				<ReactPlayer style={{ marginTop: "32px", marginBottom: "32px" }} className="react-player" url={videoPlayerUrl} controls={true} />
+			</div>
+		);
+	}
+
 	function videoArea() {
 		return (
 			<>
-				<div className="react-player-container">
-					<ReactPlayer style={{ marginTop: "32px", marginBottom: "32px"}} className="react-player" url={videoPlayerUrl} controls={true} />
-				</div>
-
-				<div className="video-list-container">
-					{youtubeSearchResult?.map((videoData: VideoData) => <VideoItem key={videoData.url} onClick={onVideoItemClick} videoData={videoData} />)}
+                { videoPlayerUrl && reactPlayerContainer() }
+				
+                <div className="video-list-container">
+					{youtubeSearchResult?.map((videoData: VideoData) => (
+						<VideoItem key={videoData.url} onClick={onVideoItemClick} videoData={videoData} />
+					))}
 				</div>
 			</>
 		);
 	}
 
 	function loadingImage() {
-
 		return (
 			<div className="loading-image-container">
 				<img src={loadingAnimation} alt="loading..." />
 			</div>
-		)
+		);
 	}
 
 	return (
