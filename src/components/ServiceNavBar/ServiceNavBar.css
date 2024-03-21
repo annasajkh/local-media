@@ -1,10 +1,10 @@
 .service-navbar {
-  background-color: var(--item-color);
-  min-width: 256px;
-  justify-content: center;
-  align-items: center;
-  padding-left: 16px;
-  padding-right: 16px;
-  padding-top: 16px;
-  padding-bottom: 16px;
+	background-color: var(--item-color);
+	min-width: 256px;
+	justify-content: center;
+	align-items: center;
+	padding-left: 16px;
+	padding-right: 16px;
+	padding-top: 16px;
+	padding-bottom: 16px;
 }

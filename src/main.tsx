@@ -7,9 +7,9 @@ import "./index.css";
 import { IpcMainInvokeEvent } from "electron";
 
 declare global {
-    interface Window {
-        electron: any;
-    }
+	interface Window {
+		electron: any;
+	}
 }
 
 ReactDOM.createRoot(document.getElementById("root")!).render(

@@ -10,7 +10,7 @@ export default function App() {
 		<div className="app">
 			<HashRouter>
 				<ServiceNavBar />
-				
+
 				<MainArea>
 					<Routes>
 						<Route path="/local_youtube" element={<LocalYoutube />} />

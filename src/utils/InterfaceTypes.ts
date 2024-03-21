@@ -1,6 +1,5 @@
-
 export interface VideoData {
-    is_short: boolean;
+	is_short: boolean;
 	thumbnail_url: string;
 	title: string;
 	url: string;
@@ -8,5 +7,5 @@ export interface VideoData {
 	channel_name: string | null;
 	channel_is_verified: boolean | null;
 	view_count: number;
-    background_color: string | null
+	background_color: string | null;
 }

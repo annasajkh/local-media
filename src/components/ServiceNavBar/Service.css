@@ -1,47 +1,47 @@
 .service-container {
-  border-radius: 5px;
-  display: flex;
-  border-radius: 3px;
+	border-radius: 5px;
+	display: flex;
+	border-radius: 3px;
 }
 
 .service-container:hover {
-  background-color: #24292e;
+	background-color: #24292e;
 }
 
 .service-container-selected {
-  background-color: #30363d;
+	background-color: #30363d;
 }
 
 .service-container-not-selected {
-  background-color: transparent;
+	background-color: transparent;
 }
 
 .service-logo-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-left: 16px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin-left: 16px;
 }
 
 .service-logo {
-  width: 32px;
-  height: 32px;
-  border-radius: 3px;
-  user-select: none;
+	width: 32px;
+	height: 32px;
+	border-radius: 3px;
+	user-select: none;
 }
 
 .service-text-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  margin-right: 16px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+	margin-right: 16px;
 }
 
 .service-text {
-  user-select: none;
+	user-select: none;
 }
 
 .change-cursor-to-pointer {
-  cursor: pointer;
+	cursor: pointer;
 }

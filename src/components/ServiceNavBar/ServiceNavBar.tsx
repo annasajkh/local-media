@@ -9,9 +9,9 @@ import soundcloudLogoPath from "../../assets/service_logos/soundcloud.png";
 export default function ServiceNavBar() {
 	const [selectedIndex, setSelectedIndex] = useState(-1);
 
-  function onServiceClicked(index: number) {
-    setSelectedIndex(index);
-  }
+	function onServiceClicked(index: number) {
+		setSelectedIndex(index);
+	}
 
 	return (
 		<div className="service-navbar">
@@ -20,7 +20,7 @@ export default function ServiceNavBar() {
 			</Link>
 
 			<Link to="/local_soundcloud">
-				<Service logoPath={soundcloudLogoPath} name="SoundCloud" isSelected={selectedIndex == 1}  onClick={() => onServiceClicked(1)}></Service>
+				<Service logoPath={soundcloudLogoPath} name="SoundCloud" isSelected={selectedIndex == 1} onClick={() => onServiceClicked(1)}></Service>
 			</Link>
 		</div>
 	);
