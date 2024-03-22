@@ -6,9 +6,7 @@ import { IpcMainInvokeEvent, ipcMain, net} from "electron";
 import os from "os";
 import { spawn } from "child_process";
 import { VideoData } from "../src/utils/InterfaceTypes";
-import fs from "fs";
-import util from "util";
-
+import { chmod } from "fs/promises";
 // The built directory structure
 //
 // ├─┬─┬ dist
@@ -24,7 +22,6 @@ process.env.VITE_PUBLIC = app.isPackaged ? process.env.DIST : path.join(process.
 let win: BrowserWindow | null;
 // 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
 const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
-const chmod = util.promisify(fs.chmod)
 
 contextMenu({
 	showSaveImageAs: true,
@@ -56,34 +53,30 @@ function createWindow() {
 	}
 }
 
-
-async function searchYoutubeVideo(_event: IpcMainInvokeEvent, query: string, count: number): Promise<VideoData[] | null> {
-    let executablePath: string = "";
+async function searchYoutubeVideo(query: string, count: number): Promise<VideoData[] | null> {
+    let executablePath: string;
 
     switch (os.platform()) {
         case "win32":
             executablePath = ".\\externals\\yt-dlp\\yt-dlp-windows.exe";
             break;
-    
         case "linux":
-        case "darwin":
-            
-            if (os.platform() == "linux") {
-                executablePath = "./externals/yt-dlp/yt-dlp-linux";
-            }
-            else {
-
-                executablePath = "./externals/yt-dlp/yt-dlp-macos";
-            }
-
-            try {
-                // Add execute permissions
-                await chmod(executablePath, "755");
-            } catch (err) {
-                console.error(`Failed to set execute permissions: ${err}`);
-                return null;
-            }
+            executablePath = "./externals/yt-dlp/yt-dlp-linux";
             break;
+        case "darwin":
+            executablePath = "./externals/yt-dlp/yt-dlp-macos";
+            break;
+        default:
+            throw new Error('Unsupported platform');
+    }
+
+    try {
+        if (os.platform() !== "win32") {
+            await chmod(executablePath, "755");
+        }
+    } catch (err) {
+        console.error(`Failed to set execute permissions: ${err}`);
+        return null;
     }
 
     const ytDlp = spawn(executablePath, [`ytsearch${count}:${query}`, "--dump-json", "--flat-playlist"]);
@@ -93,11 +86,16 @@ async function searchYoutubeVideo(_event: IpcMainInvokeEvent, query: string, cou
         output += data;
     });
 
-    ytDlp.stderr.on("data", (data: string) => {
-        console.error(`stderr: ${data}`);
-    });
-
     return new Promise((resolve, reject) => {
+        ytDlp.on("error", (err) => {
+            console.error(`Failed to start subprocess: ${err}`);
+            reject(err);
+        });
+
+        ytDlp.stderr.on("data", (data: string) => {
+            console.error(`stderr: ${data}`);
+        });
+
         ytDlp.on("close", async (code) => {
             if (code !== 0) {
                 console.error(`yt-dlp process exited with code ${code}`);
@@ -107,8 +105,8 @@ async function searchYoutubeVideo(_event: IpcMainInvokeEvent, query: string, cou
                     const videoListString: string[] = output.split("\n").filter((line) => line.trim() !== "");
                     const videoListJson: VideoData[] = [];
 
-                    for (let i = 0; i < videoListString.length; i++) {
-                        const videoJson = JSON.parse(videoListString[i]);
+                    for (const jsonString of videoListString) {
+                        const videoJson = JSON.parse(jsonString);
                         const videoThumbnailURL: string = videoJson.thumbnails[videoJson.thumbnails.length - 1].url;
 
                         videoListJson.push({
@@ -124,13 +122,13 @@ async function searchYoutubeVideo(_event: IpcMainInvokeEvent, query: string, cou
                         });
                     }
 
-                    const foundURL: string[] = [];
-                    const duplicateFiltered: VideoData[] = []
+                    const foundURL = new Set<string>();
+                    const duplicateFiltered: VideoData[] = [];
 
-                    for (let i = 0; i < videoListJson.length; i++) {
-                        if (!foundURL.includes(videoListJson[i].url)) {
-                            foundURL.push(videoListJson[i].url)
-                            duplicateFiltered.push(videoListJson[i])
+                    for (const video of videoListJson) {
+                        if (!foundURL.has(video.url)) {
+                            foundURL.add(video.url);
+                            duplicateFiltered.push(video);
                         }
                     }
                     
@@ -147,7 +145,7 @@ async function searchYoutubeVideo(_event: IpcMainInvokeEvent, query: string, cou
 
 
 ipcMain.handle("searchYoutubeVideo", async (_event: IpcMainInvokeEvent, query: string, count: number): Promise<VideoData[] | null> => {
-    return searchYoutubeVideo(_event, query, count).catch((error) => {
+    return searchYoutubeVideo(query, count).catch((error) => {
         console.error(error);
         throw error;
     });
