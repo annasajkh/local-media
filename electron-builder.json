@@ -9,7 +9,17 @@
 	"files": ["dist", "dist-electron"],
 	"mac": {
 		"target": ["dmg"],
-		"artifactName": "${productName}-Mac-${version}-Installer.${ext}"
+		"artifactName": "${productName}-Mac-${version}-Installer.${ext}",
+        "asarUnpack": [
+			"./resources/externals/yt-dlp/*"
+		],
+		"extraResources": [
+			{
+				"from": "./resources/",
+				"to": ".",
+				"filter": ["**/*"]
+			}
+		]
 	},
 	"win": {
 		"target": [
@@ -18,7 +28,17 @@
 				"arch": ["x64"]
 			}
 		],
-		"artifactName": "${productName}-Windows-${version}-Setup.${ext}"
+		"artifactName": "${productName}-Windows-${version}-Setup.${ext}",
+        "asarUnpack": [
+			"./resources/externals/yt-dlp/*"
+		],
+		"extraResources": [
+			{
+				"from": "./resources/",
+				"to": ".",
+				"filter": ["**/*"]
+			}
+		]
 	},
 	"nsis": {
 		"oneClick": false,
@@ -28,6 +48,16 @@
 	},
 	"linux": {
 		"target": ["AppImage"],
-		"artifactName": "${productName}-Linux-${version}.${ext}"
+		"artifactName": "${productName}-Linux-${version}.${ext}",
+        "asarUnpack": [
+			"./resources/externals/yt-dlp/*"
+		],
+		"extraResources": [
+			{
+				"from": "./resources/",
+				"to": ".",
+				"filter": ["**/*"]
+			}
+		]
 	}
 }

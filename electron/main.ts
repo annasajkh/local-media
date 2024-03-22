@@ -7,6 +7,7 @@ import os from "os";
 import { spawn } from "child_process";
 import { VideoData } from "../src/utils/InterfaceTypes";
 import { chmod } from "fs/promises";
+
 // The built directory structure
 //
 // ├─┬─┬ dist
@@ -58,16 +59,16 @@ async function searchYoutubeVideo(query: string, count: number): Promise<VideoDa
 
     switch (os.platform()) {
         case "win32":
-            executablePath = ".\\externals\\yt-dlp\\yt-dlp-windows.exe";
+            executablePath = path.join(".", "resources", "externals", "yt-dlp", "yt-dlp-windows.exe");
             break;
         case "linux":
-            executablePath = "./externals/yt-dlp/yt-dlp-linux";
+            executablePath = path.join(".", "resources", "externals", "yt-dlp", "yt-dlp-linux");
             break;
         case "darwin":
-            executablePath = "./externals/yt-dlp/yt-dlp-macos";
+            executablePath = path.join(".", "resources", "externals", "yt-dlp", "yt-dlp-macos");
             break;
         default:
-            throw new Error('Unsupported platform');
+            throw new Error("Unsupported platform");
     }
 
     try {
