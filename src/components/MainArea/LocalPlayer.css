@@ -1,0 +1,25 @@
+.local-player-container {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+    margin-bottom: 16px;
+}
+
+.local-player-item {
+    background-color: var(--item-color);
+    border-radius: 8px;
+    padding: 32px;
+    position: relative;
+}
+
+.local-player-close-button {
+    width: 24px;
+    height: 24px;
+    position: absolute;
+    top: 6px;
+	right: 6px;
+}
+
+.local-player-close-button:hover {
+    cursor: pointer;
+}

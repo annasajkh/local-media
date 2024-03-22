@@ -8,37 +8,34 @@ import SearchBar from "../components/MainArea/TopBar/SearchBar";
 
 import loadingAnimation from "../assets/animations/loading.gif";
 import VideoItem from "../components/MainArea/LocalYoutube/VideoItem";
-import ReactPlayer from "react-player";
 import { VideoData } from "../utils/InterfaceTypes";
+import LocalPlayer from "../components/MainArea/LocalPlayer";
 
 
 export default function LocalYoutube() {
 	const [youtubeSearchResult, setYoutubeSearchResult] = useState<VideoData[] | null>(null);
-	const [videoPlayerUrl, setVideoPlayerUrl] = useState<string>();
+    const [videoPlayerUrl, setVideoPlayerUrl] = useState<string>();
+	
 
 	async function searchYoutubeVideo(query: string) {
 		setYoutubeSearchResult([]);
 
-		const result: VideoData[] = await window.electron.searchYoutubeVideo(query, 9 * 5);
+		const result: VideoData[] = await window.electron.searchYoutubeVideo(query, 4 * 4);
 		setYoutubeSearchResult(result);
 	}
+
+    function onLocalPlayerClosed() {
+        setVideoPlayerUrl("");
+    }
 
 	function onVideoItemClick(url: string) {
 		setVideoPlayerUrl(url);
 	}
 
-	function reactPlayerContainer() {
-		return (
-			<div className="react-player-container">
-				<ReactPlayer style={{ marginTop: "32px", marginBottom: "32px" }} className="react-player" url={videoPlayerUrl} controls={true} />
-			</div>
-		);
-	}
-
 	function videoArea() {
 		return (
 			<>
-                { videoPlayerUrl && reactPlayerContainer() }
+                { videoPlayerUrl && <LocalPlayer url={videoPlayerUrl} onClose={onLocalPlayerClosed}/> }
 				
                 <div className="video-list-container">
 					{youtubeSearchResult?.map((videoData: VideoData) => (
@@ -52,7 +49,7 @@ export default function LocalYoutube() {
 	function loadingImage() {
 		return (
 			<div className="loading-image-container">
-				<img src={loadingAnimation} alt="loading..." />
+				<img className="loading-image" src={loadingAnimation} alt="loading..." />
 			</div>
 		);
 	}
