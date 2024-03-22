@@ -6,6 +6,8 @@ import { IpcMainInvokeEvent, ipcMain, net} from "electron";
 import os from "os";
 import { spawn } from "child_process";
 import { VideoData } from "../src/utils/InterfaceTypes";
+import fs from "fs";
+import util from "util";
 
 // The built directory structure
 //
@@ -22,6 +24,7 @@ process.env.VITE_PUBLIC = app.isPackaged ? process.env.DIST : path.join(process.
 let win: BrowserWindow | null;
 // 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
 const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
+const chmod = util.promisify(fs.chmod)
 
 contextMenu({
 	showSaveImageAs: true,
@@ -53,81 +56,101 @@ function createWindow() {
 	}
 }
 
-ipcMain.handle("searchYoutubeVideo", async (_event: IpcMainInvokeEvent, query: string, count: number): Promise<VideoData[] | null> => {
-	return new Promise((resolve, reject) => {
-		let executablePath: string = "";
 
-		switch (os.platform()) {
-			case "win32":
-				executablePath = ".\\externals\\yt-dlp\\yt-dlp-windows.exe";
-				break;
-		
-			case "linux":
-				executablePath = "./externals/yt-dlp/yt-dlp-linux";
-				break;
-			
-			case "darwin":
-				executablePath = "./externals/yt-dlp/yt-dlp-macos";
-				break;
-		}
+async function searchYoutubeVideo(_event: IpcMainInvokeEvent, query: string, count: number): Promise<VideoData[] | null> {
+    let executablePath: string = "";
 
-		const ytDlp = spawn(executablePath, [`ytsearch${count}:${query}`, "--dump-json", "--flat-playlist"]);
-		let output: string = "";
+    switch (os.platform()) {
+        case "win32":
+            executablePath = ".\\externals\\yt-dlp\\yt-dlp-windows.exe";
+            break;
+    
+        case "linux":
+        case "darwin":
+            
+            if (os.platform() == "linux") {
+                executablePath = "./externals/yt-dlp/yt-dlp-linux";
+            }
+            else {
 
-		ytDlp.stdout.on("data", (data: string) => {
-			output += data;
-		});
+                executablePath = "./externals/yt-dlp/yt-dlp-macos";
+            }
 
-		ytDlp.stderr.on("data", (data: string) => {
-			console.error(`stderr: ${data}`);
-		});
+            try {
+                // Add execute permissions
+                await chmod(executablePath, "755");
+            } catch (err) {
+                console.error(`Failed to set execute permissions: ${err}`);
+                return null;
+            }
+            break;
+    }
 
-		ytDlp.on("close", async (code) => {
-			if (code !== 0) {
-				console.error(`yt-dlp process exited with code ${code}`);
-				reject(new Error(`yt-dlp process exited with code ${code}`));
-			} else {
-				try {
-					const videoListString: string[] = output.split("\n").filter((line) => line.trim() !== "");
-					const videoListJson: VideoData[] = [];
+    const ytDlp = spawn(executablePath, [`ytsearch${count}:${query}`, "--dump-json", "--flat-playlist"]);
+    let output: string = "";
 
-					for (let i = 0; i < videoListString.length; i++) {
-						const videoJson = JSON.parse(videoListString[i]);
-						const videoThumbnailURL: string = videoJson.thumbnails[videoJson.thumbnails.length - 1].url;
+    ytDlp.stdout.on("data", (data: string) => {
+        output += data;
+    });
 
-						videoListJson.push({
+    ytDlp.stderr.on("data", (data: string) => {
+        console.error(`stderr: ${data}`);
+    });
+
+    return new Promise((resolve, reject) => {
+        ytDlp.on("close", async (code) => {
+            if (code !== 0) {
+                console.error(`yt-dlp process exited with code ${code}`);
+                reject(new Error(`yt-dlp process exited with code ${code}`));
+            } else {
+                try {
+                    const videoListString: string[] = output.split("\n").filter((line) => line.trim() !== "");
+                    const videoListJson: VideoData[] = [];
+
+                    for (let i = 0; i < videoListString.length; i++) {
+                        const videoJson = JSON.parse(videoListString[i]);
+                        const videoThumbnailURL: string = videoJson.thumbnails[videoJson.thumbnails.length - 1].url;
+
+                        videoListJson.push({
                             is_short: videoJson.duration_string == null,
-							thumbnail_url: videoThumbnailURL,
-							duration: videoJson.duration_string,
-							title: videoJson.title,
-							channel_name: videoJson.channel,
-							channel_is_verified: videoJson.channel_is_verified,
-							view_count: videoJson.view_count,
-							url: videoJson.url,
-							background_color: null,
-						});
-					}
+                            thumbnail_url: videoThumbnailURL,
+                            duration: videoJson.duration_string,
+                            title: videoJson.title,
+                            channel_name: videoJson.channel,
+                            channel_is_verified: videoJson.channel_is_verified,
+                            view_count: videoJson.view_count,
+                            url: videoJson.url,
+                            background_color: null,
+                        });
+                    }
 
-					const foundURL: string[] = [];
-					const duplicateFiltered: VideoData[] = []
+                    const foundURL: string[] = [];
+                    const duplicateFiltered: VideoData[] = []
 
-					for (let i = 0; i < videoListJson.length; i++) {
-						if (!foundURL.includes(videoListJson[i].url)) {
-							foundURL.push(videoListJson[i].url)
-							duplicateFiltered.push(videoListJson[i])
-						}
-					}
-					
+                    for (let i = 0; i < videoListJson.length; i++) {
+                        if (!foundURL.includes(videoListJson[i].url)) {
+                            foundURL.push(videoListJson[i].url)
+                            duplicateFiltered.push(videoListJson[i])
+                        }
+                    }
+                    
+                    resolve(duplicateFiltered);
 
-					resolve(duplicateFiltered);
+                } catch (error) {
+                    console.error(error);
+                    reject(error);
+                }
+            }
+        });
+    });
+}
 
-				} catch (error) {
-					console.error(error);
-					reject(error);
-				}
-			}
-		});
-	});
+
+ipcMain.handle("searchYoutubeVideo", async (_event: IpcMainInvokeEvent, query: string, count: number): Promise<VideoData[] | null> => {
+    return searchYoutubeVideo(_event, query, count).catch((error) => {
+        console.error(error);
+        throw error;
+    });
 });
 
 ipcMain.handle("fetchImage", async (_event: IpcMainInvokeEvent, imageUrl: string): Promise<Buffer | null>  => {
