@@ -6,6 +6,5 @@ export interface VideoData {
 	duration: string | undefined;
 	channel_name: string | null;
 	channel_is_verified: boolean | null;
-	view_count: number;
 	background_color: string | null;
 }

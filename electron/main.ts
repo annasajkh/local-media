@@ -117,7 +117,6 @@ async function searchYoutubeVideo(query: string, count: number): Promise<VideoDa
                             title: videoJson.title,
                             channel_name: videoJson.channel,
                             channel_is_verified: videoJson.channel_is_verified,
-                            view_count: videoJson.view_count,
                             url: videoJson.url,
                             background_color: null,
                         });

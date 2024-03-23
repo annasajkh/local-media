@@ -35,13 +35,32 @@
 }
 
 .video-info-container {
-    padding: 4px
+    height: 64px;
 }
 
 .video-title {
-    line-height: 1.5rem;
-    height: 3rem;
     overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
     margin-top: 4px;
-    margin-bottom: 4px;
+    margin-bottom: 0px;
+}
+
+.channel-name {
+    margin: 0;
+}
+
+.channel-name-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    color: #aaa;
+}
+
+.channel-is-verified {
+    filter: invert(50%);
+    transform: scale(0.6);
+    padding: 0;
+    margin: 0;
 }

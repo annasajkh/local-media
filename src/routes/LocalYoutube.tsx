@@ -20,7 +20,7 @@ export default function LocalYoutube() {
 	async function searchYoutubeVideo(query: string) {
 		setYoutubeSearchResult([]);
 
-		const result: VideoData[] = await window.electron.searchYoutubeVideo(query, 4 * 4);
+		const result: VideoData[] = await window.electron.searchYoutubeVideo(query, 4 * 10);
 		setYoutubeSearchResult(result);
 	}
 
