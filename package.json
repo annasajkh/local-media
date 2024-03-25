@@ -8,14 +8,14 @@
 	"version": "0.0.1-alpha",
 	"scripts": {
 		"dev": "vite",
-        "build:win": "tsc && vite build && electron-builder --win",
-        "build:mac": "tsc && vite build && electron-builder --mac",
-        "build:linux": "tsc && vite build && electron-builder --linux",
-        
+		"build:win": "tsc && vite build && electron-builder --win",
+		"build:mac": "tsc && vite build && electron-builder --mac",
+		"build:linux": "tsc && vite build && electron-builder --linux",
 		"lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
 		"preview": "vite preview"
 	},
 	"dependencies": {
+		"@radix-ui/react-tooltip": "^1.0.7",
 		"electron-context-menu": "^3.6.1",
 		"fast-average-color": "^9.4.0",
 		"react": "^18.2.0",

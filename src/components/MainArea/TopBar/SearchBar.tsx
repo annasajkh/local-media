@@ -1,6 +1,7 @@
 import "./SearchBar.css";
 
-import searchLogo from "../../../assets/icons/search_icon.png";
+import searchIconPath from "../../../assets/icons/search.png";
+
 import { ChangeEvent, DetailedHTMLProps, InputHTMLAttributes, useState } from "react";
 
 interface Props {
@@ -32,8 +33,9 @@ export default function SearchBar({onSearchEnter}: Props) {
 
 	return (
         <div style={{border: searchBarContainerBorder}} className="search-bar-container">
-            <div className="search-logo-container">
-                <img src={searchLogo} className="search-logo"></img>
+            <div className="search-icon-container">
+                <img src={searchIconPath} className="search-icon"></img>
+                
             </div>
             <input onKeyDown={onSearchKeyDown} onChange={onChange} onFocus={onSearchInputFocused} onBlur={onSearchInputBlurred} className="search-bar" type="text" placeholder="Search" name="search"></input>
         </div>

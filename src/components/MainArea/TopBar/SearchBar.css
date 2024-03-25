@@ -15,16 +15,20 @@
     width: 100%;
 }
 
-.search-logo-container {
+.search-icon-container {
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-.search-logo {
+.search-icon {
 	width: 32px;
 	height: 32px;
 	border-radius: 3px;
 	user-select: none;
     padding-right: 8px;
+}
+
+.filter-icon {
+    
 }

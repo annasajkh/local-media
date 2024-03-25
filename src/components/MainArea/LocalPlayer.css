@@ -7,9 +7,12 @@
 
 .local-player-item {
     background-color: var(--item-color);
-    border-radius: 8px;
     padding-top: 32px;
     position: relative;
+}
+
+.react-player {
+    border-radius: 8px;
 }
 
 .local-player-close-button {
@@ -22,4 +25,15 @@
 
 .local-player-close-button:hover {
     cursor: pointer;
+}
+
+.local-player-close-button-tooltip {
+    background-color: #1c1c1c;
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    border-radius: 4px;
+    color: white;
+    font-size: smaller;
 }

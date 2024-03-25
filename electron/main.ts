@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { app, BrowserWindow } from "electron";
 import path from "node:path";
 
@@ -32,8 +33,9 @@ contextMenu({
 function createWindow() {
 	win = new BrowserWindow({
 		width: 960,
-		height: 540,
-        minWidth: 674,
+		height: 800,
+        minWidth: 960,
+		minHeight: 800,
 		autoHideMenuBar: true,
 		icon: path.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
 		webPreferences: {
@@ -49,7 +51,6 @@ function createWindow() {
 	if (VITE_DEV_SERVER_URL) {
 		win.loadURL(VITE_DEV_SERVER_URL);
 	} else {
-		// win.loadFile('dist/index.html')
 		win.loadFile(path.join(process.env.DIST, "index.html"));
 	}
 }
@@ -81,6 +82,7 @@ async function searchYoutubeVideo(query: string, count: number): Promise<VideoDa
     }
 
     const ytDlp = spawn(executablePath, [`ytsearch${count}:${query}`, "--dump-json", "--flat-playlist"]);
+    
     let output: string = "";
 
     ytDlp.stdout.on("data", (data: string) => {
@@ -154,15 +156,17 @@ ipcMain.handle("searchYoutubeVideo", async (_event: IpcMainInvokeEvent, query: s
 ipcMain.handle("fetchImage", async (_event: IpcMainInvokeEvent, imageUrl: string): Promise<Buffer | null>  => {
 	return new Promise((resolve, reject) => {
 		const request = net.request(imageUrl);
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const imageData: any = [];
+        
 		request.on("response", (response) => {
 			response.on("data", (chunk) => {
 				imageData.push(chunk);
 			});
+
 			response.on("end", () => resolve(Buffer.concat(imageData)));
 			response.on("error", reject);
 		});
+
 		request.end();
 	});
 });
