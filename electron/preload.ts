@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { contextBridge, ipcRenderer } from "electron";
-import { VideoData } from "../src/utils/InterfaceTypes";
+import { VideoData, YoutubeSearchData } from "../src/utils/InterfaceTypes";
 
 
 // --------- Expose some API to the Renderer process ---------
@@ -13,7 +13,7 @@ contextBridge.exposeInMainWorld("electron", {
 		removeListener: ipcRenderer.removeListener.bind(ipcRenderer),
 	},
 
-	searchYoutubeVideo: async (query: string, count: number): Promise<VideoData[] | null> => await ipcRenderer.invoke("searchYoutubeVideo", query, count),
+	searchYoutubeVideo: async (youtubeSearchData: YoutubeSearchData): Promise<VideoData[] | null> => await ipcRenderer.invoke("searchYoutubeVideo", youtubeSearchData),
 	fetchImage: async (imageUrl: string): Promise<Buffer | null> => await ipcRenderer.invoke("fetchImage", imageUrl)
 });
 

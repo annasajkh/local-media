@@ -9,4 +9,6 @@
 :root {
 	--item-color: #181b1e;
 	--background-color: #1e2226;
+    --border-color: #30363d;
+    --border-color-focused: #363d44;
 }

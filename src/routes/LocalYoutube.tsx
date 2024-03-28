@@ -8,43 +8,39 @@ import SearchBar from "../components/MainArea/TopBar/SearchBar";
 
 import loadingAnimation from "../assets/animations/loading.gif";
 import VideoItem from "../components/MainArea/LocalYoutube/VideoItem";
-import { VideoData } from "../utils/InterfaceTypes";
+import { YoutubeSearchData, VideoData, YoutubeSearchType } from "../utils/InterfaceTypes";
 import LocalPlayer from "../components/MainArea/LocalPlayer";
-
+import LocalYoutubeFilterContent from "../components/MainArea/LocalYoutube/LocalYoutubeFilterContent";
 
 export default function LocalYoutube() {
 	const [youtubeSearchResult, setYoutubeSearchResult] = useState<VideoData[] | null>(null);
-    const [videoPlayerUrl, setVideoPlayerUrl] = useState<string>();
-	
+	const [videoPlayerUrl, setVideoPlayerUrl] = useState<string>();
+    const [youtubeSearchType, setYoutubeSearchType] = useState<YoutubeSearchType>(YoutubeSearchType.ALL);
 
 	async function searchYoutubeVideo(query: string) {
 		setYoutubeSearchResult([]);
 
-		const result: VideoData[] = await window.electron.searchYoutubeVideo(query, 4 * 10);
+        const youtubeSearchData: YoutubeSearchData  = {
+            query: query,
+            count: 128,
+            type: youtubeSearchType!
+        }
+
+		const result: VideoData[] = await window.electron.searchYoutubeVideo(youtubeSearchData);
 		setYoutubeSearchResult(result);
 	}
 
-    function onLocalPlayerClosed() {
-        setVideoPlayerUrl("");
-    }
+	function onLocalPlayerClosed() {
+		setVideoPlayerUrl("");
+	}
 
 	function onVideoItemClick(url: string) {
 		setVideoPlayerUrl(url);
 	}
 
-	function videoArea() {
-		return (
-			<>
-                { videoPlayerUrl && <LocalPlayer url={videoPlayerUrl} onClose={onLocalPlayerClosed}/> }
-				
-                <div className="video-list-container">
-					{youtubeSearchResult?.map((videoData: VideoData) => (
-						<VideoItem key={videoData.url} onClick={onVideoItemClick} videoData={videoData} />
-					))}
-				</div>
-			</>
-		);
-	}
+    function onTypeSelectChange(youtubeSearchType: YoutubeSearchType) {
+        setYoutubeSearchType(youtubeSearchType);
+    }
 
 	function loadingImage() {
 		return (
@@ -54,12 +50,26 @@ export default function LocalYoutube() {
 		);
 	}
 
+	function videoArea() {
+		return (
+			<>
+				{videoPlayerUrl && <LocalPlayer url={videoPlayerUrl} onClose={onLocalPlayerClosed} />}
+
+				<div className="video-list-container">
+					{youtubeSearchResult?.map((videoData: VideoData) => (
+						<VideoItem key={videoData.url} onClick={onVideoItemClick} videoData={videoData} />
+					))}
+				</div>
+			</>
+		);
+	}
+
 	return (
 		<div className="local-youtube">
 			<TopBar>
-				<SearchBar onSearchEnter={searchYoutubeVideo} />
+				<SearchBar onSearchEnter={searchYoutubeVideo} filterContent={<LocalYoutubeFilterContent onTypeSelectChange={onTypeSelectChange} youtubeSearchType={youtubeSearchType!}/>} />
 			</TopBar>
-
+            
 			{youtubeSearchResult?.length === 0 ? loadingImage() : videoArea()}
 		</div>
 	);

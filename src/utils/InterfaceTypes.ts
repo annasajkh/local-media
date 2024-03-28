@@ -8,3 +8,15 @@ export interface VideoData {
 	channel_is_verified: boolean | null;
 	background_color: string | null;
 }
+
+export enum YoutubeSearchType {
+    VIDEO,
+    SHORT,
+    ALL
+}
+
+export interface YoutubeSearchData {
+    query: string,
+    count: number,
+    type: YoutubeSearchType
+}

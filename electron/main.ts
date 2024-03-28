@@ -6,8 +6,8 @@ import contextMenu from "electron-context-menu";
 import { IpcMainInvokeEvent, ipcMain, net} from "electron";
 import os from "os";
 import { spawn } from "child_process";
-import { VideoData } from "../src/utils/InterfaceTypes";
 import { chmod } from "fs/promises";
+import { VideoData, YoutubeSearchData, YoutubeSearchType } from "../src/utils/InterfaceTypes";
 
 // The built directory structure
 //
@@ -55,7 +55,7 @@ function createWindow() {
 	}
 }
 
-async function searchYoutubeVideo(query: string, count: number): Promise<VideoData[] | null> {
+async function searchYoutubeVideo(youtubeSearchData: YoutubeSearchData): Promise<VideoData[] | null> {
     let executablePath: string;
 
     switch (os.platform()) {
@@ -81,7 +81,24 @@ async function searchYoutubeVideo(query: string, count: number): Promise<VideoDa
         return null;
     }
 
-    const ytDlp = spawn(executablePath, [`ytsearch${count}:${query}`, "--dump-json", "--flat-playlist"]);
+    switch (youtubeSearchData.type) {
+        case YoutubeSearchType.SHORT:
+            youtubeSearchData.query = `#shorts ${youtubeSearchData.query}`
+            break;
+    }
+
+    const commandArguments: string[] = [`ytsearch${youtubeSearchData.count}:${youtubeSearchData.query}`, "--dump-json", "--flat-playlist"];
+    
+    switch (youtubeSearchData.type) {
+        case YoutubeSearchType.VIDEO:
+            commandArguments.push(...["--match-filter", "original_url!*=/shorts/ & url!*=/shorts/"]);
+            break;
+        case YoutubeSearchType.SHORT:
+            commandArguments.push(...["--match-filter", "original_url*=/shorts/ & url*=/shorts/"]);
+            break;
+    }
+
+    const ytDlp = spawn(executablePath, commandArguments);
     
     let output: string = "";
 
@@ -146,8 +163,8 @@ async function searchYoutubeVideo(query: string, count: number): Promise<VideoDa
 }
 
 
-ipcMain.handle("searchYoutubeVideo", async (_event: IpcMainInvokeEvent, query: string, count: number): Promise<VideoData[] | null> => {
-    return searchYoutubeVideo(query, count).catch((error) => {
+ipcMain.handle("searchYoutubeVideo", async (_event: IpcMainInvokeEvent, youtubeSearchData: YoutubeSearchData): Promise<VideoData[] | null> => {
+    return searchYoutubeVideo(youtubeSearchData).catch((error) => {
         console.error(error);
         throw error;
     });

@@ -1,7 +1,8 @@
 import ReactPlayer from "react-player";
-import closeIcon from "../../assets/icons/close.png";
 import "./LocalPlayer.css";
 import * as Tooltip from "@radix-ui/react-tooltip";
+
+import { Cross2Icon } from '@radix-ui/react-icons';
 
 interface Props {
 	url: string;
@@ -17,7 +18,7 @@ export default function LocalPlayer({ url, onClose }: Props) {
 				<Tooltip.Provider delayDuration={100}>
 					<Tooltip.Root>
 						<Tooltip.Trigger asChild>
-                            <img className="local-player-close-button" src={closeIcon} onClick={() => onClose()}></img>
+                            <Cross2Icon className="local-player-close-button" onClick={() => onClose()} />
 						</Tooltip.Trigger>
 						<Tooltip.Portal>
 							<Tooltip.Content className="local-player-close-button-tooltip" side="bottom">

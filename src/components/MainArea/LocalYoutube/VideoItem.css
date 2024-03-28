@@ -1,13 +1,15 @@
 .video-item {
     width: 320px;
     background-color: var(--item-color);
+    border: 1px solid var(--border-color);
     border-radius: 10px;
     padding: 8px;
 }
 
 .video-item:hover {
     cursor: pointer;
-    transform: scale(1.0075)
+    transform: scale(1.0075);
+    border: 1px solid var(--border-color-focused);
 }
 
 .video-thumbnail-container {
